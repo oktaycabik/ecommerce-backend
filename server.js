@@ -1,8 +1,17 @@
 const express = require('express');
 const prometheus = require('prom-client');
+const connectDB = require('./config/db');
+const routers = require("./routes/index");
 
 const app = express();
 const port = 3000;
+
+// Veritabanı Bağlantısı
+connectDB();
+
+// Middleware
+app.use(express.json());
+
 
 // Prometheus metriklerini kaydedecek registry oluştur
 const register = new prometheus.Registry();
@@ -42,12 +51,8 @@ app.use((req, res, next) => {
   next();
 });
 
-// Örnek bir endpoint tanımlayalım
-app.get('/api', (req, res) => {
-  // Sayaçı artır
-  // API işlemleri burada gerçekleştirilir
-  res.send('Hello from API!');
-});
+app.use("/api", routers);
+
 
 // /metrics endpoint'i Prometheus için metrikleri sunar
 app.get('/metrics', async (req, res) => {
